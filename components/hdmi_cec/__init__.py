@@ -152,3 +152,37 @@ async def send_action_to_code(config, action_id, template_args, args):
     cg.add(var.set_data(data_template_))
 
     return var
+
+# OnkyoRI
+OnkyoRIData, OnkyoRIBinarySensor, OnkyoRITrigger, OnkyoRIAction, OnkyoRIDumper = (
+    declare_protocol("OnkyoRI")
+)
+OnkyoRI_SCHEMA = cv.Schema({cv.Required(CONF_DATA): cv.hex_uint32_t})
+
+
+@register_binary_sensor("onkyori", OnkyoRIBinarySensor, OnkyoRI_SCHEMA)
+def onkyori_binary_sensor(var, config):
+    cg.add(
+        var.set_data(
+            cg.StructInitializer(
+                OnkyoRIData,
+                ("data", config[CONF_DATA]),
+            )
+        )
+    )
+
+
+@register_trigger("onkyori", OnkyoRITrigger, OnkyoRIData)
+def onkyori_trigger(var, config):
+    pass
+
+
+@register_dumper("onkyori", OnkyoRIDumper)
+def onkyori_dumper(var, config):
+    pass
+
+
+@register_action("onkyori", OnkyoRIAction, OnkyoRI_SCHEMA)
+async def onkyori_action(var, config, args):
+    template_ = await cg.templatable(config[CONF_DATA], args, cg.uint32)
+    cg.add(var.set_data(template_))
